@@ -1,0 +1,100 @@
+---
+title: "Algorithmic_bias"
+author: "Farzana Chowdhury"
+date: "2025-07-14"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# NYPD Stop-and-Frisk Dataset - Initial Exploration and Cleaning Plan
+
+# Load required libraries
+library(readxl)
+library(dplyr)
+library(janitor)
+library(stringr)
+library(tidyverse)
+library(magrittr)
+
+```
+
+```{r}
+# Load the 2024 CSV file
+# Read the dataset
+sqf_2024 <- read_csv("sqf-2024.csv")
+
+# View data structure
+View(sqf_2024)
+spec(sqf_2024)  # Or whatever your dataframe is named
+
+```
+```{r}
+
+summary(sqf_2024)
+
+```
+
+```{r}
+# Check missing values per column
+colSums(is.na(sqf_2024))
+
+# check % missing
+sapply(sqf_2024, function(x) mean(is.na(x)) * 100)
+
+```
+
+```{r}
+#This makes all column names lowercase and snake_case
+sqf_2024 <- sqf_2024 %>% 
+  janitor::clean_names()
+
+```
+
+```{r}
+sqf_2024 %>%
+  summarise(across(everything(), ~ sum(is.na(.)))) %>%
+  t() %>%
+  as.data.frame() %>%
+  setNames("missing_count") %>%
+  arrange(desc(missing_count))
+
+
+```
+```{r}
+# Step 5: Clean categorical columns ( convert Y/N to TRUE/FALSE)
+sqf_2024 <- sqf_2024 %>%
+  mutate(
+    frisked_flag = ifelse(frisked_flag == "Y", TRUE, FALSE),
+    searched_flag = ifelse(searched_flag == "Y", TRUE, FALSE),
+    suspect_arrested_flag = ifelse(suspect_arrested_flag == "Y", TRUE, FALSE)
+  )
+```
+
+
+```{r}
+# Convert suspect age to numeric
+sqf_2024 <- sqf_2024 %>%
+  mutate(suspect_reported_age = as.numeric(suspect_reported_age))
+```
+```{r}
+# Drop columns with too many missing values (over 30%)
+sqf_2024 <- sqf_2024 %>%
+  select(where(~ mean(is.na(.)) < 0.3))  # keep columns with <30% NA
+```
+
+```{r}
+# remove columns with no variation
+sqf_2024 <- sqf_2024 %>%
+  select(where(~ n_distinct(.) > 1))
+```
+
+```{r}
+# final check
+summary(sqf_2024)
+```
+
+
