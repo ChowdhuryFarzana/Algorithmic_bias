@@ -32,6 +32,6 @@ This project builds on existing research that has revealed disproportionately hi
 
 ---
 
-## 📌 License
+## License
 
 This project uses only public and open datasets. Please credit original data providers such as NIST, MIT Media Lab, and the Stanford Open Policing Project.
